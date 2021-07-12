@@ -1,4 +1,4 @@
-package speedtest
+package client
 
 import (
 	"fmt"
@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/dchest/uniuri"
-	"github.com/kylegrantlucas/speedtest/http"
-	"github.com/kylegrantlucas/speedtest/util"
+	"speedtest/http"
+	"speedtest/util"
 )
 
 var (
@@ -53,6 +53,14 @@ func NewClient(config *http.SpeedtestConfig, dlsizes []int, ulsizes []int, timeo
 }
 
 func NewDefaultClient() (*Client, error) {
+	return newDefaultClient("")
+}
+
+func NewDefaultClientOf(iface string) (*Client, error) {
+	return newDefaultClient(iface)
+}
+
+func newDefaultClient(iface string) (*Client, error) {
 	config := &http.SpeedtestConfig{
 		ConfigURL:       "http://c.speedtest.net/speedtest-config.php?x=" + uniuri.New(),
 		ServersURL:      "http://c.speedtest.net/speedtest-servers-static.php?x=" + uniuri.New(),
@@ -60,6 +68,7 @@ func NewDefaultClient() (*Client, error) {
 		NumClosest:      3,
 		NumLatencyTests: 3,
 		UserAgent:       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.21 Safari/537.36",
+		Interface:       iface,
 	}
 
 	httpClient, err := http.NewClient(config, 30*time.Second)

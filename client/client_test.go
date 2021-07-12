@@ -1,4 +1,4 @@
-package speedtest
+package client
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	sthttp "github.com/kylegrantlucas/speedtest/http"
+	sthttp "speedtest/http"
 )
 
 func EmptyTest(t *testing.T) {
