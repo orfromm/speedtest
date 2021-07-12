@@ -9,12 +9,13 @@ import (
 	"net"
 	"net/http"
 	"sort"
+	"speedtest/util"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/kylegrantlucas/speedtest/coords"
-	stxml "github.com/kylegrantlucas/speedtest/xml"
+	"speedtest/coords"
+	stxml "speedtest/xml"
 )
 
 const max = "max"
@@ -448,10 +449,39 @@ func (stClient *Client) UploadSpeed(url string, mimetype string, data []byte) (s
 	return mbps, nil
 }
 
+// a variation of from https://github.com/zpeters/speedtest/blob/master/internal/sthttp/sthttp.go#L493
+func (stClient *Client) getSourceIP() (string, error) {
+	interfaceOption := stClient.SpeedtestConfig.Interface
+	if interfaceOption == "" {
+		return "", nil
+	}
+
+	// does it look like an IP address?
+	if net.ParseIP(interfaceOption) != nil {
+		return interfaceOption, nil
+	}
+
+	// assume that it is the name of an interface
+	if n := util.GetNetwork(interfaceOption); n != nil {
+		return n.IP.String(), nil
+	}
+	return "", errors.New("no address found")
+}
+
 func (stClient *Client) getHTTPClient() (*http.Client, error) {
 	dialer := net.Dialer{
 		Timeout:   stClient.Timeout,
 		KeepAlive: stClient.Timeout,
+	}
+
+	if sourceIP, err := stClient.getSourceIP(); err != nil {
+		return nil, err
+	} else if sourceIP != "" {
+		bindAddrIP, err := net.ResolveIPAddr("ip", sourceIP)
+		if err != nil {
+			return nil, err
+		}
+		dialer.LocalAddr = &net.TCPAddr{IP: bindAddrIP.IP}
 	}
 
 	transport := &http.Transport{
