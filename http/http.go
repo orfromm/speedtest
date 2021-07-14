@@ -4,18 +4,18 @@ import (
 	"bytes"
 	"encoding/xml"
 	"errors"
+	"github.com/orfromm/speedtest/util"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"sort"
-	"speedtest/util"
 	"strconv"
 	"strings"
 	"time"
 
-	"speedtest/coords"
-	stxml "speedtest/xml"
+	"github.com/orfromm/speedtest/coords"
+	stxml "github.com/orfromm/speedtest/xml"
 )
 
 const max = "max"

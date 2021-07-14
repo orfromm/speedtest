@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/dchest/uniuri"
-	"speedtest/http"
-	"speedtest/util"
+	"github.com/orfromm/speedtest/http"
+	"github.com/orfromm/speedtest/util"
 )
 
 var (
