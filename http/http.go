@@ -372,6 +372,22 @@ func (stClient *Client) GetFastestServer(servers []Server) (Server, error) {
 	return successfulServers[0], nil
 }
 
+// Taken from commit `https://github.com/zpeters/speedtest/commit/9b0c8060acae2967ed84b1c0f912492ca697b1cf`
+// Use fix buffer to calculate the length of body
+func respBodyLen(resp *http.Response) int {
+	l := 0
+	buf := make([]byte, 4096)
+	for {
+		if n, err := resp.Body.Read(buf); err != nil {
+			break
+		} else {
+			l += n
+		}
+	}
+
+	return l
+}
+
 // DownloadSpeed measures the mbps of downloading a URL
 func (stClient *Client) DownloadSpeed(url string) (speed float64, err error) {
 	start := time.Now()
@@ -392,12 +408,8 @@ func (stClient *Client) DownloadSpeed(url string) (speed float64, err error) {
 		return 0, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return 0, err
-	}
+	bodyLen := respBodyLen(resp)
 	finish := time.Now()
-	bodyLen := len(body)
 
 	defer func() {
 		err = resp.Body.Close()
