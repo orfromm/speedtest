@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -350,6 +351,10 @@ func (stClient *Client) GetFastestServer(servers []Server) (Server, error) {
 		latency, err := stClient.GetLatency(stClient.GetLatencyURL(servers[server]))
 
 		if err != nil {
+			// If error is a url error and has timed out
+			if urlerr, ok := err.(*url.Error); ok && urlerr.Timeout() {
+				continue
+			}
 			return Server{}, err
 		}
 
